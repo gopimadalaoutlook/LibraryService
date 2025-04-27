@@ -4,8 +4,7 @@
     "LibraryProject.WebAPI": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api/libraries",
-      "applicationUrl": "http://*:8000",
+      "applicationUrl": "https://localhost:8000;http://localhost:8001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

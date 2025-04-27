@@ -22,11 +22,13 @@ namespace LibraryService.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Add support for Dependency Injection for internal services (BooksService and LibrariesService)
-
             
             services.AddDbContext<LibraryContext>(options => options.UseInMemoryDatabase("librarydb"));
             services.AddControllers();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Library Service API", Version = "v1" });
+            });
             services.AddScoped<ILibrariesService, LibrariesService>();
             services.AddScoped<IBooksService, BooksService>();
         }
@@ -38,6 +40,12 @@ namespace LibraryService.WebAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Library Service API V1");
+                c.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
+            });
 
             app.UseRouting();
 
