@@ -20,6 +20,10 @@ namespace LibraryService.WebAPI.Services
 
         public async Task<IEnumerable<Library>> Get(int[] ids)
         {
+            if(ids == null || ids.Length == 0)
+            {
+                return await _libraryContext.Libraries.ToListAsync();
+            }
             var ret = new List<Library>();
             var missingCacheIds = new List<int>();
             foreach (var id in ids)
@@ -29,6 +33,7 @@ namespace LibraryService.WebAPI.Services
                 if (cachedLibrary == null)
                 {
                     missingCacheIds.Add(id);
+                    continue;
                 }
                 ret.Add(cachedLibrary);
             }

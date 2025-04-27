@@ -5,6 +5,7 @@ using LibraryService.WebAPI.Data;
 using LibraryService.WebAPI.Services;
 using System;
 using LibraryService.WebAPI.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LibraryService.WebAPI.Controllers
 {
@@ -29,7 +30,7 @@ namespace LibraryService.WebAPI.Controllers
             try
             {
                 var libraries = await _librariesService.Get(null);
-                return Ok(libraries);
+                return Ok(new ApiGetListResponse<Library> { Count = libraries.Count(), Items = libraries });
             }
             catch (Exception ex)
             {
@@ -64,6 +65,7 @@ namespace LibraryService.WebAPI.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(Library), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Add(Library library)
         {
             try
@@ -82,6 +84,7 @@ namespace LibraryService.WebAPI.Controllers
         [ProducesResponseType(typeof(Library), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int libraryId, Library library)
         {
             try
@@ -106,7 +109,7 @@ namespace LibraryService.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
-
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int libraryId)
         {
             try

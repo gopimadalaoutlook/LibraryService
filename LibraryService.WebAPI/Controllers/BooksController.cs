@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using LibraryService.WebAPI.Data;
 using LibraryService.WebAPI.Services;
 using LibraryService.WebAPI.DTO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LibraryService.WebAPI.Controllers
 {
     [ApiController]
     [Route("api/libraries/{libraryId}/[controller]")]
+    [Authorize]
     public class BooksController : ControllerBase
     {
         private readonly ILibrariesService _librariesService;
@@ -38,7 +40,7 @@ namespace LibraryService.WebAPI.Controllers
                     return NotFound();
                 }
                 var books = await _booksService.Get(libraryId);
-                return Ok(books);
+                return Ok(new ApiGetListResponse<Book> { Count = books.Count(), Items = books });
             }
             catch (Exception ex)
             {
@@ -51,6 +53,7 @@ namespace LibraryService.WebAPI.Controllers
         [ProducesResponseType(typeof(Book), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Post(int libraryId, Book book)
         {
             try
@@ -78,6 +81,7 @@ namespace LibraryService.WebAPI.Controllers
         [ProducesResponseType(typeof(Book), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Put(int libraryId, Book book)
         {
             try
@@ -103,6 +107,7 @@ namespace LibraryService.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(Exception), StatusCodes.Status500InternalServerError)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int libraryId, int id)
         {
             try
