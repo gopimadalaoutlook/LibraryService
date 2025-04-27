@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace LibraryService.Caching
 {
-    public class RedisCacheService : ILibraryCacheService
+    public class RedisCacheService : IRemoteCacheService
     {
         private readonly IDistributedCache _redis;
 

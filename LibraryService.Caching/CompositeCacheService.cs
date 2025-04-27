@@ -6,9 +6,9 @@ namespace LibraryService.Caching
     public class CompositeCacheService : ILibraryCacheService
     {
         private readonly IMemoryCache _cache;
-        private readonly ILibraryCacheService _remoteCache;
+        private readonly IRemoteCacheService _remoteCache;
 
-        public CompositeCacheService(IMemoryCache cache, ILibraryCacheService remoteCache)
+        public CompositeCacheService(IMemoryCache cache, IRemoteCacheService remoteCache)
         {
             _cache = cache;
             _remoteCache = remoteCache;

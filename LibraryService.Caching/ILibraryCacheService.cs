@@ -6,4 +6,7 @@
         Task SetAsync<T>(object key, T value);
         Task RemoveAsync(object key);
     }
+    public interface IRemoteCacheService : ILibraryCacheService
+    {
+    }
 }

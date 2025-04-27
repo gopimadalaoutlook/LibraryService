@@ -36,7 +36,7 @@ namespace LibraryService.WebAPI
                 options.Configuration = Configuration.GetConnectionString("Redis");
             });
             services.AddSingleton<ILibraryCacheService, CompositeCacheService>();
-            services.AddSingleton<ILibraryCacheService, RedisCacheService>();
+            services.AddSingleton<IRemoteCacheService, RedisCacheService>();
             services.AddScoped<ILibrariesService, LibrariesService>();
             services.AddScoped<IBooksService, BooksService>();
         }
