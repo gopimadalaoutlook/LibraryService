@@ -13,11 +13,13 @@ namespace LibraryService.WebAPI.Controllers
     {
         private readonly ILibrariesService _librariesService;
         private readonly IBooksService _booksService;
+        private readonly ILogger<BooksController> _logger;
 
-        public BooksController(IBooksService booksService, ILibrariesService librariesService)
+        public BooksController(IBooksService booksService, ILibrariesService librariesService, ILogger<BooksController> logger)
         {
             _librariesService = librariesService;
-            _booksService = booksService;
+            _booksService = booksService;                
+            _logger = logger;
         }
 
 
@@ -31,12 +33,16 @@ namespace LibraryService.WebAPI.Controllers
             {
                 var library = (await _librariesService.Get(new[] { libraryId })).FirstOrDefault();
                 if (library == null)
+                {
+                    _logger.LogWarning($"Library with id {libraryId} not found");
                     return NotFound();
+                }
                 var books = await _booksService.Get(libraryId);
                 return Ok(books);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"Error getting books for library {libraryId}");
                 return StatusCode(500, ex.Message);
             }
 
@@ -51,13 +57,17 @@ namespace LibraryService.WebAPI.Controllers
             {
                 var library = (await _librariesService.Get(new[] { libraryId })).FirstOrDefault();
                 if (library == null)
+                {
+                    _logger.LogWarning($"Library with id {libraryId} not found");
                     return NotFound();
+                }
                 book.LibraryId = libraryId;
                 var addedBook = await _booksService.Add(book);
                 return CreatedAtAction(nameof(Get), new { libraryId = libraryId, id = addedBook.Id }, addedBook);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"Error adding book to library {libraryId}");
                 return StatusCode(500, ex.Message);
             }
 
@@ -74,13 +84,17 @@ namespace LibraryService.WebAPI.Controllers
             {
                 var library = (await _librariesService.Get(new[] { libraryId })).FirstOrDefault();
                 if (library == null)
+                {
+                    _logger.LogWarning($"Library with id {libraryId} not found");
                     return NotFound();
+                }
                 book.LibraryId = libraryId;
                 var updatedBook = await _booksService.Update(book);
                 return Ok(updatedBook);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"Error updating book in library {libraryId}");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -95,12 +109,16 @@ namespace LibraryService.WebAPI.Controllers
             {
                 var book = (await _booksService.Get(libraryId)).FirstOrDefault(x => x.Id == id);
                 if (book == null)
+                {
+                    _logger.LogWarning($"Book with id {id} not found in library {libraryId}");
                     return NotFound();
+                }
                 var deletedBook = await _booksService.Delete(book);
                 return NoContent();
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"Error deleting book with id {id} from library {libraryId}");
                 return StatusCode(500, ex.Message);
             }
         }

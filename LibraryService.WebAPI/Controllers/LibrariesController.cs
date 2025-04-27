@@ -13,10 +13,12 @@ namespace LibraryService.WebAPI.Controllers
     public class LibrariesController : ControllerBase
     {
         private readonly ILibrariesService _librariesService;
+        private readonly ILogger<LibrariesController> _logger;
 
-        public LibrariesController(ILibrariesService librariesService)
+        public LibrariesController(ILibrariesService librariesService, ILogger<LibrariesController> logger)
         {
             _librariesService = librariesService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -31,6 +33,7 @@ namespace LibraryService.WebAPI.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error getting libraries");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -45,11 +48,15 @@ namespace LibraryService.WebAPI.Controllers
             {
                 var library = (await _librariesService.Get(new[] { libraryId })).FirstOrDefault();
                 if (library == null)
+                {
+                    _logger.LogWarning($"Library with id {libraryId} not found");
                     return NotFound();
+                }
                 return Ok(library);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"Error getting library {libraryId}");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -66,6 +73,7 @@ namespace LibraryService.WebAPI.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error adding library");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -80,12 +88,16 @@ namespace LibraryService.WebAPI.Controllers
             {
                 var existingLibrary = (await _librariesService.Get(new[] { libraryId })).FirstOrDefault();
                 if (existingLibrary == null)
+                {
+                    _logger.LogWarning($"Library with id {libraryId} not found");
                     return NotFound();
+                }
                 await _librariesService.Update(library);
                 return Ok(library);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"Error updating library {libraryId}");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -101,12 +113,16 @@ namespace LibraryService.WebAPI.Controllers
             {
                 var existingLibrary = (await _librariesService.Get(new[] { libraryId })).FirstOrDefault();
                 if (existingLibrary == null)
+                {
+                    _logger.LogWarning($"Library with id {libraryId} not found");
                     return NotFound();
+                }
                 await _librariesService.Delete(existingLibrary);
                 return NoContent();
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, $"Error deleting library {libraryId}");
                 return StatusCode(500, ex.Message);
             }
         }
