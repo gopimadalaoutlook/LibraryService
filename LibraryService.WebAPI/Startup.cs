@@ -1,3 +1,4 @@
+using LibraryService.Caching;
 using LibraryService.WebAPI.Data;
 using LibraryService.WebAPI.Services;
 using Microsoft.AspNetCore.Builder;
@@ -29,6 +30,13 @@ namespace LibraryService.WebAPI
             {
                 c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Library Service API", Version = "v1" });
             });
+            services.AddMemoryCache();
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = Configuration.GetConnectionString("Redis");
+            });
+            services.AddSingleton<ILibraryCacheService, CompositeCacheService>();
+            services.AddSingleton<ILibraryCacheService, RedisCacheService>();
             services.AddScoped<ILibrariesService, LibrariesService>();
             services.AddScoped<IBooksService, BooksService>();
         }

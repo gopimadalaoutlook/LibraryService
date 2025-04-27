@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LibraryService.Caching;
 using LibraryService.WebAPI.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,20 +11,38 @@ namespace LibraryService.WebAPI.Services
     public class LibrariesService : ILibrariesService
     {
         private readonly LibraryContext _libraryContext;
-
-        public LibrariesService(LibraryContext libraryContext)
+        private readonly ILibraryCacheService _libraryCacheService; 
+        public LibrariesService(LibraryContext libraryContext, ILibraryCacheService libraryCacheService)
         {
             _libraryContext = libraryContext;
+            _libraryCacheService = libraryCacheService;
         }
 
         public async Task<IEnumerable<Library>> Get(int[] ids)
         {
-            var projects = _libraryContext.Libraries.AsQueryable();
-
-            if (ids != null && ids.Any())
-                projects = projects.Where(x => ids.Contains(x.Id));
-
-            return await projects.ToListAsync();
+            var ret = new List<Library>();
+            var missingCacheIds = new List<int>();
+            foreach (var id in ids)
+            {
+                var cacheKey = $"library-{id}";
+                var cachedLibrary = await _libraryCacheService.GetAsync<Library>(cacheKey);
+                if (cachedLibrary == null)
+                {
+                    missingCacheIds.Add(id);
+                }
+                ret.Add(cachedLibrary);
+            }
+            if (missingCacheIds.Any())
+            {
+                var libraries = await _libraryContext.Libraries.Where(x => missingCacheIds.Contains(x.Id)).ToListAsync();
+                foreach (var library in libraries)
+                {
+                    var cacheKey = $"library-{library.Id}";
+                    await _libraryCacheService.SetAsync(cacheKey, library);
+                    ret.Add(library);
+                }
+            }
+            return ret;
         }
 
         public async Task<Library> Add(Library library)
